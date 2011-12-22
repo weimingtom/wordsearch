@@ -1,0 +1,14 @@
+see:
+http://jackysz.blogbus.com/logs/17809584.html
+
+> cd /d G:\soft\pyKanjiDict\pyKanjiDict-1.0-win32\webdict\mysql\bin
+> mysqldump -uroot -p --quick --compatible=mysql40 --default-character-set=latin1 --extended-insert=FALSE japdict2 words > zzz.sql
+> mysql -uroot -p
+mysql> create database japdict3 default charset=utf8;
+mysql> exit
+> mysql -uroot -p --default-character-set=utf8 japdict3 < zzz.sql 
+> mysql -uroot -p
+mysql> charset gbk;
+mysql> use japdict3;
+mysql> select * from words limit 1,1\G
+
