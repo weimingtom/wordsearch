@@ -1,16 +1,28 @@
 <?php
-	$dbname = 'words';
+if ($_SERVER["SERVER_NAME"] == "localhost" ||
+	$_SERVER["SERVER_NAME"] == "127.0.0.1") {
+	$dbname = 'wordsearch';
 	$dbuser = 'root';
-	$dbpass = '123456';
-	$dbhost = '127.0.0.1';
+	$dbpass = '';
+	$dbhost = 'localhost';
+} else {
+	//mopaas.com
+	$dbname = getenv('MOPAAS_MYSQL30155_NAME');
+	$dbuser = getenv('MOPAAS_MYSQL30155_USER');
+	$dbpass = getenv('MOPAAS_MYSQL30155_PASSWORD');
+	$dbhost = getenv('MOPAAS_MYSQL30155_HOST');
+}
 
-$con = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname) or die("数据库连接出错，请检查连接字串。"); //提示错误
+$con = mysql_connect($dbhost, $dbuser, $dbpass) or die("数据库连接出错，请检查连接字串。"); //提示错误
 
-mysqli_query($con, "SET NAMES 'UTF8'"); 
-mysqli_query($con, "SET CHARACTER_SET='UTF8"); 
-mysqli_query($con, "SET CHARACTER_SET_RESULTS='UTF8'"); 
-mysqli_query($con, "SET CHARACTER_SET_CLIENT='UTF8'"); 
-mysqli_query($con, "SET CHARACTER_SET_CONNECTION='UTF8'"); 
+mysql_query("SET NAMES 'UTF8'", $con); 
+mysql_query("SET CHARACTER_SET='UTF8", $con); 
+mysql_query("SET CHARACTER_SET_RESULTS='UTF8'", $con); 
+mysql_query("SET CHARACTER_SET_CLIENT='UTF8'", $con); 
+mysql_query("SET CHARACTER_SET_CONNECTION='UTF8'", $con); 
+
+mysql_select_db($dbname, $con) or die("数据库连接出错，请检查连接字串。"); //提示错误
+
 
 
 $starttime = explode(' ', microtime());
@@ -34,16 +46,14 @@ $word = isset($_REQUEST["word"]) ? $_REQUEST["word"] : "";
 
 <?php
 if ($word != "") {
-	//$sql = "SELECT id, word FROM words WHERE word REGEXP '".$word."' order by id";
-    $sql = "SELECT id, word FROM words WHERE word like '%".$word."%' order by id";
-    //$sql = "SELECT id, word FROM words WHERE MATCH (word) AGAINST ('".$word."') order by id";
+	$sql = "SELECT id, word FROM words WHERE word REGEXP '".$word."' order by id";
 } else {
 	$sql = "SELECT id, word FROM words order by id";
 }
-$result = mysqli_query($con, $sql);
+$result = mysql_query($sql, $con);
 if ($result !== false) {
-	$rsRows = mysqli_num_rows($result);
-    $rs = mysqli_fetch_assoc($result);
+	$rsRows = mysql_num_rows($result);
+    $rs = mysql_fetch_assoc($result);
 } else {
 	$rsRows = 0;
     $rs = false;
@@ -61,20 +71,20 @@ if ($rs === false) {
 		    $toPage = intval($_REQUEST["p"]);
 			if ($toPage > $rsPageCount) {
 			   	$rsAbsolutePage = $rsPageCount;
-			   	mysqli_data_seek($result, ($rsAbsolutePage - 1) * $rsPageSize);
+			   	mysql_data_seek($result, ($rsAbsolutePage - 1) * $rsPageSize);
 			   	$intCurPage = $rsPageCount;
 			} else if ($toPage <= 0) {
 			   	$rsAbsolutePage = 1;
-				mysqli_data_seek($result, ($rsAbsolutePage - 1) * $rsPageSize);
+				mysql_data_seek($result, ($rsAbsolutePage - 1) * $rsPageSize);
 			   	$intCurPage = 1;
 			} else {
 			   	$rsAbsolutePage = $toPage;
-			   	mysqli_data_seek($result, ($rsAbsolutePage - 1) * $rsPageSize);
+			   	mysql_data_seek($result, ($rsAbsolutePage - 1) * $rsPageSize);
 			   	$intCurPage = $toPage;
 			}
 		 } else {
 			$rsAbsolutePage = 1;
-			mysqli_data_seek($result, ($rsAbsolutePage - 1) * $rsPageSize);
+			mysql_data_seek($result, ($rsAbsolutePage - 1) * $rsPageSize);
 			$intCurPage = 1;
 		 }
 		 $intCurPage = intval($intCurPage);	
@@ -135,7 +145,7 @@ last
 <table border="1">
 <?php
 	for ($i = 0; $i < $rsPageSize; $i++) {
-		$rs = mysqli_fetch_assoc($result);
+		$rs = mysql_fetch_assoc($result);
 	    if ($rs === false) {     
 			break; 
 		}
